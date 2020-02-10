@@ -8,7 +8,6 @@ class Cell
 		type val;
 		Cell<type>* next;
 	public:
-		Cell(){}
 		Cell(type value)
 		{ 
 			this->val = value;
@@ -21,47 +20,28 @@ class stack
 {
 	private:
 		int length = 0;
-		Cell<TYPE>* head = NULL;
+		Cell<TYPE>* top = NULL;
 	public:
 		void push(TYPE value)
 		{
-			Cell<TYPE>* temp = head;
-			if(temp == NULL)
-			{
-				Cell<TYPE>* newCell = new Cell<TYPE>(value);
-				newCell->next = NULL;
-				head = newCell;
-				length++;
-				return;
-			}
-			while(temp->next != NULL)
-			{
-				temp = temp->next;
-			}
-			Cell<TYPE>* newCell = new Cell<TYPE>(value);
-			temp->next = newCell;
-			newCell->next = NULL;
+			Cell<TYPE>* cell = new Cell<TYPE>(value);
+			cell->next = top;
+			top = cell;
 			length++;
 		}
 		void pop()
 		{
-			Cell<TYPE> *cur = head, *temp = head;
-			if(temp == NULL)
+			if(top == NULL)
 			{
 				cout << "Stack is underflow" << endl;
 				return;
 			}
-			while(temp->next != NULL)
-			{
-				cur = temp;
-				temp = temp->next;
-			}
-			cur->next = NULL;
+			top = top->next;
 			length--;
 		}
 		void Traverse()
 		{
-			Cell<TYPE>* temp = head;
+			Cell<TYPE>* temp = top;
 			if(temp == NULL)
 			{
 				cout << "Stack is underflow" << endl;
@@ -70,23 +50,71 @@ class stack
 			while(temp != NULL)
 			{
 				cout << "[" << temp->val << "]";
-				temp = temp->next;				
+				temp = temp->next;
 			}
 			cout << endl;
 			cout << "Length: " << length << endl;
 		}	
 };
 
+void CheckForStackExistance(bool& stackExists)
+{
+	int opt;
+	if(stackExists == true)
+		{
+			cout << "Stack already exists, you want to create new one or continue on existed one?" << endl;
+			cout << " (1) Create new.\n (2) Continue." << endl;
+			cin >> opt;
+			switch(opt)
+			{
+				case 1: stackExists = false; break;
+				case 2: stackExists = true; break;
+				default: cout << "Invalid Option" << endl;						
+			}
+		}
+}
+
+template<typename sType>
+void Stack_Creation(stack<sType>& stk, bool &returnToMenu, int& chancesUsed, bool& terminated)
+{
+	int option2;
+	cout << "Enter any of the options below" << endl;
+	cout << " (1) Push.\n (2) Pop.\n (3) Display.\n (4) Return back for stack creation menu.\n (5) Exit" << endl;
+	cin >> option2;
+	switch(option2)
+		{
+			case 1:
+				{
+					sType valueToPush;
+					cout << "Enter the data to push" << endl;
+					cin >> valueToPush;
+					stk.push(valueToPush); 
+					break;
+				}
+				case 2: stk.pop(); break;
+				case 3: stk.Traverse(); break;
+				case 4: returnToMenu = true; break;
+				case 5: terminated = true; break;
+				default:
+					if(chancesUsed < 3) 
+						PrintMessages(++chancesUsed);
+					else
+					{
+						cout << "Returning to Stack Creation Menu....!" << endl;
+						returnToMenu = true;
+					}
+			}	
+}
+
 int main()
 {
-	int option1, option2;
+	int option1, totalChancesUsed = 0;
 	bool intStackExists = false, floatStackExists = false, charStackExists = false, stringStackExists = false;
 	int intchancesUsed = 0, floatchancesUsed = 0, charchancesUsed = 0, stringchancesUsed = 0;
 	stack<int>* intStack = NULL;
 	stack<float>* floatStack = NULL;
 	stack<char>* charStack = NULL;
 	stack<string>* stringStack = NULL;
-	int totalChancesUsed = 0;
 	while(1)
 	{
 		menu:
@@ -95,22 +123,11 @@ int main()
 		cin >> option1;
 		switch(option1)
 		{
-			// Integer Stack Creation.
 			case 1:
-				int inOp;
+			{
+				bool isTerminated = false, returnMenu = false;
 				intchancesUsed = 0;
-				if(intStackExists == true)
-				{
-					cout << "Stack already exists, you want to create new one or continue on existed one?" << endl;
-					cout << " (1) Create new.\n (2) Continue." << endl;
-					cin >> inOp;
-					switch(inOp)
-					{
-						case 1: intStackExists = false; break;
-						case 2: intStackExists = true; break;
-						default: cout << "Invalid Option" << endl;						
-					}
-				}
+				CheckForStackExistance(intStackExists);
 				if(intStackExists == false)
 				{
 					intStack = new stack<int>();
@@ -119,205 +136,69 @@ int main()
 				}
 				while(1)
 				{	
-					cout << "Enter any of the options below" << endl;
-					cout << " (1) Push.\n (2) Pop.\n (3) Display.\n (4) Return back for stack creation menu.\n (5) Exit" << endl;
-					cin >> option2;
-					switch(option2)
-					{
-						// Push
-						case 1:
-							int valueToPush;
-							cout << "Enter the value to push" << endl;
-							cin >> valueToPush;
-							intStack->push(valueToPush); 
-							break;
-						// Pop
-						case 2: intStack->pop(); break;
-						// Display
-						case 3: intStack->Traverse(); break;
-						// Returning back to creation menu
-						case 4: goto menu;
-						// Exit
-						case 5: return 0;
-						default:
-							if(intchancesUsed < 3) 
-								PrintMessages(++intchancesUsed);
-							else
-							{
-								cout << "Returning to Stack Creation Menu....!" << endl;
-								goto menu;
-							}
-					}
+					Stack_Creation(*intStack, returnMenu, intchancesUsed, isTerminated);
+					if(returnMenu) goto menu;
+					if(isTerminated)	return 0;
 				}
 				break;
-			// Float Stack Creation.
+			}
 			case 2:
-				int flOp; 
-				floatchancesUsed = 0;
-				if(floatStackExists == true)
 				{
-					cout << "Float Stack already exists, you want to create new one or continue on existed one?" << endl;
-					cout << " (1) Create new.\n (2) Continue." << endl;
-					cin >> flOp;
-					switch(flOp)
+					bool isTerminated = false, returnMenu = false;
+					floatchancesUsed = 0;
+					CheckForStackExistance(floatStackExists);
+					if(floatStackExists == false)
 					{
-						case 1: floatStackExists = false; break;
-						case 2: floatStackExists = true; break;
-						default: cout << "Invalid Option" << endl;						
+						floatStack = new stack<float>();
+						cout << "Float Stack is created, ready for use!" << endl;
+						floatStackExists = true;
 					}
-				}
-				if(floatStackExists == false)
-				{
-					floatStack = new stack<float>();
-					cout << "Float Stack is created, ready for use!" << endl;
-					floatStackExists = true;
-				}
-				while(1)
-				{	
-					cout << "Enter any of the options below" << endl;
-					cout << " (1) Push.\n (2) Pop.\n (3) Display.\n (4) Return back for stack creation menu.\n (5) Exit" << endl;
-					cin >> option2;
-					switch(option2)
-					{
-						// Push
-						case 1:
-							float valueToPush;
-							cout << "Enter the value to push" << endl;
-							cin >> valueToPush;
-							floatStack->push(valueToPush); 
-							break;
-						// Pop
-						case 2: floatStack->pop(); break;
-						// Display
-						case 3: floatStack->Traverse(); break;
-						// Returning back to creation menu
-						case 4: goto menu;
-						// Exit
-						case 5: return 0;
-						default:
-							if(floatchancesUsed < 3) 
-								PrintMessages(++floatchancesUsed);
-							else
-							{
-								cout << "Returning to Stack Creation Menu....!" << endl;
-								goto menu;
-							}
+					while(1)
+					{	
+						Stack_Creation(*floatStack, returnMenu, floatchancesUsed, isTerminated);
+						if(returnMenu) goto menu;
+						if(isTerminated)	return 0;
 					}
+					break;
 				}
-				break;
-			// Character Stack Creation.
 			case 3:
-				int chOp;
-				charchancesUsed = 0;
-				if(charStackExists == true)
 				{
-					cout << "Character Stack already exists, you want to create new one or continue on existed one?" << endl;
-					cout << " (1) Create new.\n (2) Continue." << endl;
-					cin >> chOp;
-					switch(chOp)
+					bool isTerminated = false, returnMenu = false;
+					charchancesUsed = 0;
+					CheckForStackExistance(charStackExists);
+					if(charStackExists == false)
 					{
-						case 1: charStackExists = false; break;
-						case 2: charStackExists = true; break;
-						default: cout << "Invalid Option" << endl;						
+						charStack = new stack<char>();
+						cout << "Float Stack is created, ready for use!" << endl;
+						charStackExists = true;
 					}
-				}
-				if(charStackExists == false)
-				{
-					charStack = new stack<char>();
-					cout << "Character Stack is created, ready for use!" << endl;
-					charStackExists = true;
-				}
-				while(1)
-				{	
-					cout << "Enter any of the options below" << endl;
-					cout << " (1) Push.\n (2) Pop.\n (3) Display.\n (4) Return back for stack creation menu.\n (5) Exit" << endl;
-					cin >> option2;
-					switch(option2)
-					{
-						// Push
-						case 1:
-							char valueToPush;
-							cout << "Enter the character to push" << endl;
-							cin >> valueToPush;
-							charStack->push(valueToPush); 
-							break;
-						// Pop
-						case 2: charStack->pop(); break;
-						// Display
-						case 3: charStack->Traverse(); break;
-						// Returning back to creation menu
-						case 4: goto menu;
-						// Exit
-						case 5: return 0;
-						default:
-							if(charchancesUsed < 3) 
-								PrintMessages(++charchancesUsed);
-							else
-							{
-								cout << "Returning to Stack Creation Menu....!" << endl;
-								goto menu;
-							}
+					while(1)
+					{	
+						Stack_Creation(*charStack, returnMenu, charchancesUsed, isTerminated);
+						if(returnMenu) goto menu;
+						if(isTerminated)	return 0;
 					}
-				}				 
-				break;
-			// String Stack Creation.
+					break;
+				}
 			case 4:
-				int strOp;
-				stringchancesUsed = 0;
-				if(stringStackExists == true)
 				{
-					cout << "String Stack already exists, you want to create new one or continue on existed one?" << endl;
-					cout << " (1) Create new.\n (2) Continue." << endl;
-					cin >> strOp;
-					switch(strOp)
+					bool isTerminated = false, returnMenu = false;
+					stringchancesUsed = 0;
+					CheckForStackExistance(stringStackExists);
+					if(stringStackExists == false)
 					{
-						case 1: stringStackExists = false; break;
-						case 2: stringStackExists = true; break;
-						default: cout << "Invalid Option" << endl;						
+						stringStack = new stack<string>();
+						cout << "Float Stack is created, ready for use!" << endl;
+						stringStackExists = true;
 					}
-				}
-				if(stringStackExists == false)
-				{
-					stringStack = new stack<string>();
-					cout << "String Stack is created, ready for use!" << endl;
-					stringStackExists = true;
-				}
-				while(1)
-				{	
-					cout << "Enter any of the options below" << endl;
-					cout << " (1) Push.\n (2) Pop.\n (3) Display.\n (4) Return back for stack creation menu.\n (5) Exit" << endl;
-					cin >> option2;
-					switch(option2)
-					{
-						// Push
-						case 1:
-						{
-							string valueToPush;
-							cout << "Enter the string to push" << endl;
-							cin >> valueToPush;
-							stringStack->push(valueToPush); 
-							break;
-						}
-						// Pop
-						case 2: stringStack->pop(); break;
-						// Display
-						case 3: stringStack->Traverse(); break;
-						// Returning back to creation menu
-						case 4: goto menu;
-						// Exit
-						case 5: return 0;
-						default:
-							if(stringchancesUsed < 3) 
-								PrintMessages(++stringchancesUsed);
-							else
-							{
-								cout << "Returning to Stack Creation Menu....!" << endl;
-								goto menu;
-							}
+					while(1)
+					{	
+						Stack_Creation(*stringStack, returnMenu, stringchancesUsed, isTerminated);
+						if(returnMenu) goto menu;
+						if(isTerminated) return 0;
 					}
-				} 
-				break;
-			// No Stack Creation.
+					break;
+				}
 			case 5: return 0;
 			default:
 				if(totalChancesUsed < 3) 
@@ -341,4 +222,3 @@ void PrintMessages(int n)
 	else
 		cout << "Wrong option, this is your last chance, please choose right one" << endl; 
 }
-
